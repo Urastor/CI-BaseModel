@@ -20,4 +20,27 @@ if (! defined('BASEPATH'))
  */
 class MY_Model extends CI_Model
 {
+
+    protected $table = '';
+
+    public function __construct($guessName = false)
+    {
+        parent::__construct();
+        $this->guessTableName($guessName);
+    }
+
+    private function guessTableName($guess)
+    {
+        if ($guess) {
+            if (empty($this->table) || ! is_string($this->table)) {
+                $modelName = get_class($this);
+                $this->table = strtolower(str_replace('Model', '', $modelName));
+            }
+        }
+    }
+
+    public function getTableName()
+    {
+        return $this->table;
+    }
 }
