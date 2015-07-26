@@ -52,7 +52,17 @@ class MY_Model extends CI_Model
             $this->db->where($key, $value, $protect);
         }
         
-        return $this->db->get($this->table)->row(0, $this->returnType);
+        return $this->getRow(0);
+    }
+
+    public function getRow($index = 0)
+    {
+        return $this->db->get($this->table)->row($index, $this->returnType);
+    }
+
+    public function getResult()
+    {
+        return $this->db->get($this->table)->result($this->returnType);
     }
 
     private function isIterable($var)
