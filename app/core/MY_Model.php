@@ -21,7 +21,9 @@ if (! defined('BASEPATH'))
 class MY_Model extends CI_Model
 {
 
-    protected $table = '';
+    private $table = '';
+
+    private $id;
 
     public function __construct($guessName = false)
     {
@@ -42,5 +44,15 @@ class MY_Model extends CI_Model
     public function getTableName()
     {
         return $this->table;
+    }
+
+    public function getID()
+    {
+        return $this->id;
+    }
+
+    public function setID($id)
+    {
+        $this->id = (int) $id;
     }
 }
