@@ -21,14 +21,43 @@ if (! defined('BASEPATH'))
 class MY_Model extends CI_Model
 {
 
-    private $table = '';
+    protected $table = '';
+
+    protected $primKey = 'id';
 
     private $id;
+
+    protected $returnType = 'object';
 
     public function __construct($guessName = false)
     {
         parent::__construct();
         $this->guessTableName($guessName);
+    }
+
+    /* Gets by id */
+    public function get()
+    {
+        if (! $this->hasID())
+            return null;
+        
+        return $this->getBy($this->primKey, $this->id);
+    }
+
+    public function getBy($key, $value = null, $protect = null)
+    {
+        if ($this->isIterable($value)) {
+            $this->db->where_in($key, $value, $protect);
+        } else {
+            $this->db->where($key, $value, $protect);
+        }
+        
+        return $this->db->get($this->table)->row(0, $this->returnType);
+    }
+
+    private function isIterable($var)
+    {
+        return (is_array($var) || $var instanceof \ArrayAccess);
     }
 
     private function guessTableName($guess)
@@ -54,5 +83,10 @@ class MY_Model extends CI_Model
     public function setID($id)
     {
         $this->id = (int) $id;
+    }
+
+    public function hasID()
+    {
+        return ($this->id !== null);
     }
 }
