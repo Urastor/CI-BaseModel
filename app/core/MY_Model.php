@@ -44,14 +44,23 @@ class MY_Model extends CI_Model
         return $this->getBy($this->primKey, $this->id);
     }
 
-    public function getBy($key, $value = null, $protect = null)
+    public function getBy($key, $value = null)
     {
-        if ($this->isIterable($value)) {
-            $this->db->where_in($key, $value, $protect);
-        } else {
-            $this->db->where($key, $value, $protect);
-        }
-        
+        $this->setWhere($key, $value);
+        return $this->getRow();
+    }
+
+    /**
+     * Assumes an array, with key => value relation.
+     * Important: The value needs to be an array, with at least one
+     * array in it, to anticipate the right where method.
+     * An example is up on github soon (TODO)
+     *
+     * @param array|ArrayAccess $list            
+     */
+    public function getByList($list)
+    {
+        $this->setWhere($list, null);
         return $this->getRow();
     }
 
@@ -68,6 +77,48 @@ class MY_Model extends CI_Model
     private function isIterable($var)
     {
         return (is_array($var) || $var instanceof \ArrayAccess);
+    }
+
+    private function setWhere($par1, $par2)
+    {
+        if (is_null($par2) && $this->isIterable($par1)) {
+            // by list
+            foreach ($par1 as $field => $val) {
+                // Check for not or or in second array
+                $not = false;
+                $or = false;
+                
+                if ($this->isIterable($val[1])) {
+                    $not = (isset($val[1]['useNot']) && $val[1]['useNot']);
+                    $or = (isset($val[1]['useOr']) && $val[1]['useOr']);
+                }
+                
+                // Evaluate and call where methods
+                if ($this->isIterable($val[0])) {
+                    if ($not && $or)
+                        $method = 'or_where_not_in';
+                    elseif ($not && ! $or)
+                        $method = 'or_where_in';
+                    elseif (! $not && $or)
+                        $method = 'where_not_in';
+                    else
+                        $method = 'where_in';
+                } else {
+                    $method = ($or) ? 'or_where' : 'where';
+                }
+                
+                $this->db->{$method}($field, $val);
+            }
+        } elseif (is_null($par2)) {
+            // where string
+            $this->db->where($par1);
+        } else {
+            // just a where or where_in
+            if ($this->isIterable($par2))
+                $this->db->where_in($par1, $par2);
+            else
+                $this->db->where($par1, $par2);
+        }
     }
 
     private function guessTableName($guess)
