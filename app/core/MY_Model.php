@@ -52,7 +52,7 @@ class MY_Model extends CI_Model
             $this->db->where($key, $value, $protect);
         }
         
-        return $this->getRow(0);
+        return $this->getRow();
     }
 
     public function getRow($index = 0)
@@ -98,5 +98,15 @@ class MY_Model extends CI_Model
     public function hasID()
     {
         return ($this->id !== null);
+    }
+
+    public function setReturnType($type)
+    {
+        $type = strtolower(trim($type));
+        if (in_array($type, [
+            'object',
+            'array'
+        ]) || class_exists($type))
+            $this->returnType = $type;
     }
 }
