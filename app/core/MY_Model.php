@@ -27,7 +27,7 @@ class MY_Model extends CI_Model
 
     private $id;
 
-    protected $returnType = 'object';
+    private $returnType = 'object';
 
     public function __construct($guessName = false)
     {
@@ -98,6 +98,11 @@ class MY_Model extends CI_Model
     public function hasID()
     {
         return ($this->id !== null);
+    }
+
+    public function getReturnType()
+    {
+        return $this->returnType;
     }
 
     public function setReturnType($type)
